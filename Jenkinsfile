@@ -2,35 +2,31 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK21'
-        maven 'maven3'      // use the exact name you have in Global Tool Configuration
+        jdk 'JDK21'     // exact name from your Global Tool Configuration
+        maven 'maven3'  // exact name (lowercase m)
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout GIT') {
             steps {
-                echo 'Code already checked out by Jenkins SCM'
+                echo 'Pulling student-management project from GitHub...'
+                git branch: 'main',
+                    url: 'https://github.com/SarraMannaiAvaxia/student-management.git'
             }
         }
 
-        stage('Build') {
+        stage('MAVEN Build') {
             steps {
-                sh 'mvn clean install -DskipTests'   // or without -DskipTests if you added H2
-            }
-        }
-     stage('MAVEN Build') {
-            steps {
-                // Compile + package (no tests for now to avoid DB issues)
-                // Remove -DskipTests if you added H2 for tests
-                sh 'mvn clean compile -DskipTests'
-                // Alternative full build: sh 'mvn clean install -DskipTests'
+                // Compile + package, skip tests to avoid DB connection issues
+                // Remove -DskipTests if you added H2 in-memory DB for tests
+                sh 'mvn clean install -DskipTests'
             }
         }
 
-        stage('SONARQUBE') {
+        stage('SONARQUBE Analysis') {
             environment {
-                SONAR_HOST_URL   = 'http://192.168.33.10:9000/'
-                SONAR_AUTH_TOKEN = credentials('sonarqube')   // Must match your Credential ID in Jenkins
+                SONAR_HOST_URL   = 'http://192.168.33.10:9000/'  // your VM IP:9000
+                SONAR_AUTH_TOKEN = credentials('sonarqube')      // credential ID must match exactly
             }
             steps {
                 sh '''
@@ -41,12 +37,12 @@ pipeline {
                 '''
             }
         }
-    }
-}
+
         stage('Done') {
             steps {
                 echo '=================================='
                 echo '   Student Management BUILD OK   '
+                echo '   SonarQube analysis completed   '
                 echo '=================================='
             }
         }
