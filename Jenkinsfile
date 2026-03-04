@@ -26,7 +26,7 @@ pipeline {
         stage('SONARQUBE Analysis') {
             environment {
                 SONAR_HOST_URL   = 'http://192.168.33.10:9000/'  // your VM IP:9000
-                SONAR_AUTH_TOKEN = credentials('sonarqube')      // credential ID must match exactly
+                SONAR_AUTH_TOKEN = credentials('Sonarqube')      // credential ID must match exactly
             }
             steps {
                 sh '''
